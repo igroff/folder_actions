@@ -19,7 +19,7 @@
 ###  When a glob pattern associated for a handler matches a file in the current 
 ###  directory, the handler will be invoked with the full path to the matching file
 ###  as the only parameter.
-### 
+###
 ###  e.g.
 ###   /path/to/gif/handler /current/directory/pants.gif
 ###
@@ -38,7 +38,7 @@
 ###  - if the handler exited with a non-zero exit code invoke FAILURE_ACTION
 ###  - if the handler exited with an exit code of zero invoke SUCCESS_ACTION
 ###  - if there is an AFTER_EACH_ACTION, invoke it
-###  
+###
 #############
 
 usage() {
@@ -49,7 +49,7 @@ usage() {
 }
 show_help() {
   echo
-  egrep '^###' ${0} | sed -e 's[^#*$[[g' -e 's[^### [ [g' -e 's[^#### [ [g' -e "s[\${ME}[${0}[g"
+  egrep '^###' ${0} | sed -e 's[^### [ [g' -e 's[^#### [ [g' -e "s[\${ME}[${0}[g" -e 's/^#\+$//' 
   echo
   exit 2
 }
