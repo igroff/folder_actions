@@ -41,6 +41,8 @@
 ###
 #############
 
+##############################################################################
+# <Utils>
 usage() {
   echo
   egrep '^#### ' ${0} | sed -e 's[^####[ [g' -e "s[\${ME}[${0}[g"
@@ -49,10 +51,69 @@ usage() {
 }
 show_help() {
   echo
-  egrep '^###' ${0} | sed -e 's[^### [ [g' -e 's[^#### [ [g' -e "s[\${ME}[${0}[g" -e 's/^#\+$//' 
+  egrep '^#{3}|^#{3}|^#{4}|^#{4} ' ${0} | sed -e 's[^### [ [g' -e 's[^#### [ [g' -e "s[\${ME}[${0}[g" -e 's/^#\+$//'  | less
   echo
   exit 2
 }
+write_log(){ 
+  LEVEL=${1}
+  shift
+  if [ -n "${LEVEL}" ]; then
+    echo "`date +"%x %X"` [${LEVEL}] $@";
+  else
+    echo "`date +"%x %X"` $@";
+  fi
+}
+export -f write_log
+
+hash_file(){
+  THIS_FILE=$1
+  openssl md5 ${THIS_FILE} | sed -e 's[MD5.* [[g'
+}
+export -f hash_file
+
+log_divider() { write_log "******************************************"; }
+export -f log_divider
+
+error() { write_log ${FUNCNAME^^} $@; }
+export -f error
+
+warn()  { write_log ${FUNCNAME^^} $@; }
+export -f warn
+
+info()  { write_log ${FUNCNAME^^} $@; }
+export -f info
+
+debug() { [ -n "${DEBUG}" ] && write_log ${FUNCNAME^^} $@; }
+export -f debug
+
+die() { echo $1 ; exit ${2-1} ;}
+export -f die
+
+abs_path() {
+  (cd "${1%/*}" &>/dev/null && printf "%s/%s" "$(pwd)" "${1##*/}")
+}
+export -f abs_path
+
+function abspath {
+    if [[ -d "$1" ]]; then
+        pushd "$1" >/dev/null
+        pwd
+        popd >/dev/null
+    elif [[ -e $1 ]]; then
+        pushd "$(dirname "$1")" >/dev/null
+        echo "$(pwd)/$(basename "$1")"
+        popd >/dev/null
+    else
+        echo "$1" does not exist! >&2
+        return 127
+    fi
+}
+export -f abspath
+
+# </Utils>
+##############################################################################
+
 DEFAULT_ACTION=
 declare -a ACTION_LIST
 ACTION_INDEX=0
