@@ -45,13 +45,13 @@
 # <Utils>
 usage() {
   echo
-  egrep '^#### ' ${0} | sed -e 's[^####[ [g' -e "s[\${ME}[${0}[g"
+  egrep '^#{4} ' ${0} | sed -r -e 's[^#{4}[ [g' | sed -e "s[\${ME}[${0}[g"
   echo
   exit 1
 }
 show_help() {
   echo
-  egrep '^#{3}$|^#{3} |^#{4}$|^#{4} ' ${0} | sed -r -e 's[^#{3,4}[[' -e "s[${ME}[${0}[g" | less
+  egrep '^#{3}$|^#{3} |^#{4}$|^#{4} ' ${0} | sed -r -e 's[^#{3,4}[[' | sed -e "s[\${ME}[${0}[g" | less
   echo
   exit 2
 }
