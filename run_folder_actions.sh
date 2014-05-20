@@ -1,10 +1,10 @@
 #! /usr/bin/env bash
 
 #############
-### Usage:
-###   ${ME} [-f FAILURE_ACTION] [-s SUCCES_ACTION] [-e AFTER_EACH_ACTION] -a ACTION...
-###   ${ME} [-f FAILURE_ACTION] [-s SUCCES_ACTION] [-e AFTER_EACH_ACTION] -d DEFAULT_ACTION
-###   ${ME} [-f FAILURE_ACTION] [-s SUCCES_ACTION] [-e AFTER_EACH_ACTION] -d DEFAULT_ACTION -a ACTION...
+#### Usage:
+####   ${ME} [-f FAILURE_ACTION] [-s SUCCES_ACTION] [-e AFTER_EACH_ACTION] -a ACTION...
+####   ${ME} [-f FAILURE_ACTION] [-s SUCCES_ACTION] [-e AFTER_EACH_ACTION] -d DEFAULT_ACTION
+####   ${ME} [-f FAILURE_ACTION] [-s SUCCES_ACTION] [-e AFTER_EACH_ACTION] -d DEFAULT_ACTION -a ACTION...
 ### 
 ###  Processes the contents of the current/working directory using the specified
 ###  actions.  Actions are specified by matching a glob pattern to an executable (
@@ -43,9 +43,15 @@
 
 usage() {
   echo
-  egrep '^### ' ${0} | sed -e 's[^###[ [g' -e "s[\${ME}[${0}[g"
+  egrep '^#### ' ${0} | sed -e 's[^####[ [g' -e "s[\${ME}[${0}[g"
   echo
   exit 1
+}
+show_help() {
+  echo
+  egrep '^###' ${0} | sed -e 's[^#*$[[g' -e 's[^### [ [g' -e 's[^#### [ [g' -e "s[\${ME}[${0}[g"
+  echo
+  exit 2
 }
 DEFAULT_ACTION=
 declare -a ACTION_LIST
@@ -63,13 +69,14 @@ while getopts "ha:d:" o; do
             DEFAULT_ACTION=${OPTARG}
             ;;
         h)
-            usage
+            show_help
             ;;
         *)
             usage
             ;;
     esac
 done
+[ -z "${DEFAULT_ACTION}" -a "${#ACTION_LIST[*]}" -eq 0 ] && usage
 shift $((OPTIND-1))
 for index in $(seq ${#ACTION_LIST[*]})
 do
