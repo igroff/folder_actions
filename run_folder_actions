@@ -151,9 +151,8 @@ done
     do
       if FULL_PATH=$(abspath $file); then
         if [ -r "$FULL_PATH" -o -d "$FULL_PATH" ]; then
-          info "Running ${ACTION_PARTS[1]} for $FULL_PATH"
-          if [ -n "${DO_NOT_RUN}" ]; then
-            # RUN IT!
+          if [ -z "${DO_NOT_RUN}" ]; then
+            info "Running ${ACTION_PARTS[1]} for $FULL_PATH"
           fi
         fi
       fi
