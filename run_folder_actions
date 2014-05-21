@@ -143,21 +143,22 @@ done
 # if we have no default action, and there's no other actions specified
 # we should tell our caller how we're used, since there's nothing to do
 [ -z "${DEFAULT_ACTION}" -a "${#ACTION_LIST[*]}" -eq 0 ] && usage
-(
-  for index in $(seq ${#ACTION_LIST[*]})
+for index in $(seq ${#ACTION_LIST[*]})
+do
+  # split our action on = so we get a glob, exe pair
+  IFS='=' read -ra ACTION_PARTS <<< "${ACTION_LIST[$index]}"
+  # check our current directory for 'glob matches'
+  for file in "./${ACTION_PARTS[0]}"
   do
-    # split our action on = so we get a glob, exe pair
-    IFS='=' read -ra ACTION_PARTS <<< "${ACTION_LIST[$index]}"
-    # check our current directory for 'glob matches'
-    for file in "./${ACTION_PARTS[0]}"
-    do
-      if FULL_PATH=$(abspath $file); then
-        if [ -r "$FULL_PATH" -o -d "$FULL_PATH" ]; then
-          if [ -z "${DO_NOT_RUN}" ]; then
-            info "Running ${ACTION_PARTS[1]} for $FULL_PATH"
-          fi
+    if FULL_PATH=$(abspath $file); then
+      if [ -r "$FULL_PATH" -o -d "$FULL_PATH" ]; then
+        if [ -z "${DO_NOT_RUN}" ]; then
+          info "Running ${ACTION_PARTS[1]} for $FULL_PATH"
+          (
+            ${ACTION_PARTS[1]} "${FULL_PATH}"
+          )
         fi
       fi
-    done
+    fi
   done
-)
+done
