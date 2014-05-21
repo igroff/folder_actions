@@ -105,7 +105,7 @@ function abspath {
         echo "$(pwd)/$(basename "$1")"
         popd >/dev/null
     else
-        echo "$1" does not exist! >&2
+        # the path we're given doesn't exist
         return 127
     fi
 }
@@ -122,7 +122,6 @@ while getopts "ha:d:" o; do
         a)
             ACTION=${OPTARG}
             ACTION_INDEX=$((( $ACTION_INDEX + 1 )))
-            echo "ID: ${ACTION_INDEX} ${ACTION}"
             ACTION_LIST[${ACTION_INDEX}]=$ACTION
             ;;
         d)
@@ -138,8 +137,19 @@ while getopts "ha:d:" o; do
     esac
 done
 [ -z "${DEFAULT_ACTION}" -a "${#ACTION_LIST[*]}" -eq 0 ] && usage
-shift $((OPTIND-1))
-for index in $(seq ${#ACTION_LIST[*]})
-do
-  echo ${ACTION_LIST[$index]}
-done
+(
+  for index in $(seq ${#ACTION_LIST[*]})
+  do
+    # split our action on = so we get a glob, exe pair
+    IFS='=' read -ra ACTION_PARTS <<< "${ACTION_LIST[$index]}"
+    # check our current directory for 'glob matches'
+    for file in "./${ACTION_PARTS[0]}"
+    do
+      if FULL_PATH=$(abspath $file); then
+        if [ -r "$FULL_PATH" -o -d "$FULL_PATH" ]; then
+          info "Running ${ACTION_PARTS[1]} for $FULL_PATH"
+        fi
+      fi
+    done
+  done
+)
