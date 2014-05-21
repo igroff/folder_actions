@@ -140,6 +140,8 @@ while getopts "ha:d:t" o; do
             ;;
     esac
 done
+# if we have no default action, and there's no other actions specified
+# we should tell our caller how we're used, since there's nothing to do
 [ -z "${DEFAULT_ACTION}" -a "${#ACTION_LIST[*]}" -eq 0 ] && usage
 (
   for index in $(seq ${#ACTION_LIST[*]})
