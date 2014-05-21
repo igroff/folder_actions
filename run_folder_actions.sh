@@ -141,5 +141,5 @@ done
 shift $((OPTIND-1))
 for index in $(seq ${#ACTION_LIST[*]})
 do
-  echo $index
+  echo ${ACTION_LIST[$index]}
 done
