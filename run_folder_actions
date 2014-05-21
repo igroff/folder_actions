@@ -75,16 +75,16 @@ export -f hash_file
 log_divider() { write_log "******************************************"; }
 export -f log_divider
 
-error() { write_log ${FUNCNAME^^} $@; }
+error() { write_log ${FUNCNAME^^} "$@"; }
 export -f error
 
-warn()  { write_log ${FUNCNAME^^} $@; }
+warn()  { write_log ${FUNCNAME^^} "$@"; }
 export -f warn
 
-info()  { write_log ${FUNCNAME^^} $@; }
+info()  { write_log ${FUNCNAME^^} "$@"; }
 export -f info
 
-debug() { [ -n "${DEBUG}" ] && write_log ${FUNCNAME^^} $@; }
+debug() { [ -n "${DEBUG}" ] && write_log ${FUNCNAME^^} "$@"; }
 export -f debug
 
 die() { echo $1 ; exit ${2-1} ;}
@@ -153,10 +153,13 @@ do
     if FULL_PATH=$(abspath $file); then
       if [ -r "$FULL_PATH" -o -d "$FULL_PATH" ]; then
         if [ -z "${DO_NOT_RUN}" ]; then
-          info "Running ${ACTION_PARTS[1]} for $FULL_PATH"
+          info "Starting run of ${ACTION_PARTS[1]} for $FULL_PATH"
+          info '***** start action output *******************************************************' 
           (
             ${ACTION_PARTS[1]} "${FULL_PATH}"
           )
+          info '***** end action output *******************************************************' 
+          info "Run of ${FULL_PATH} complete for ${ACTION_PARTS[1]}"
         fi
       fi
     fi
