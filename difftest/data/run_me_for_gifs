@@ -1,0 +1,2 @@
+#! /usr/bin/env bash
+echo "You ran me ${0} for ${@}"

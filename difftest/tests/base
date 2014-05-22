@@ -1,0 +1,2 @@
+#! /usr/bin/env bash
+./run_folder_actions -f ./difftest/handlers/on_failure -s ./difftest/handlers/on_success -a "*.gif=./difftest/data/run_me_for_gifs" -e ./difftest/handlers/after_each
