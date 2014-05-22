@@ -90,7 +90,7 @@ export -f debug
 die() { echo $1 ; exit ${2-1};}
 export -f die
 
-echo_error(){ echo "$@" >&2 ; }
+echo_error() { echo "$@" >&2 ; }
 export -f echo_error
 
 abs_path() {
@@ -121,7 +121,7 @@ DEFAULT_ACTION=
 declare -a ACTION_LIST
 ACTION_INDEX=0
 DO_NOT_RUN=
-while getopts "ha:d:tf:s:e:" o; do
+while getopts "hfa:d:t:s:e:" o; do
     case "${o}" in
         a)
             ACTION=${OPTARG}
@@ -134,7 +134,7 @@ while getopts "ha:d:tf:s:e:" o; do
             ;;
         f)
             FAILURE_HANDLER="${OPTARG}"
-            if [ ! -x "${FAILURE_HANDLER}" ]
+            if test \! -x "${FAILURE_HANDLER}" 
             then
               echo_error "Couldn't find an executable failure handler at: ${FAILURE_HANDLER}"  
               exit 2
@@ -142,7 +142,7 @@ while getopts "ha:d:tf:s:e:" o; do
             ;;
         s)
             SUCCESS_HANDLER="${OPTARG}"
-            if [ ! -x "${SUCCESS_HANDLER}" ]
+            if test \! -x "${SUCCESS_HANDLER}" 
             then
               echo_error "Couldn't find an executable success handler at: ${SUCCESS_HANDLER}"  
               exit 3
@@ -164,6 +164,7 @@ while getopts "ha:d:tf:s:e:" o; do
             ;;
         *)
             usage
+            exit 1
             ;;
     esac
 done
@@ -174,6 +175,9 @@ for index in $(seq ${#ACTION_LIST[*]})
 do
   # split our action on = so we get a glob, exe pair
   IFS='=' read -ra ACTION_PARTS <<< "${ACTION_LIST[$index]}"
+  debug "glob: ${ACTION_PARTS[0]}"
+  debug "action: ${ACTION_PARTS[1]}"
+  debug "looking for files in $(pwd)"
   # check our current directory for 'glob matches'
   for file in "./${ACTION_PARTS[0]}"
   do
@@ -191,8 +195,12 @@ do
           ( $AFTER_EACH_HANDLER )
           info '***** end action output *******************************************************' 
           info "Run of ${FULL_PATH} complete for ${ACTION_PARTS[1]}"
+        else
+          info "You asked me not to run, so... not doing anything"
         fi
       fi
+    else
+      debug "no files matched glob ${ACTION_PARTS[0]}"
     fi
   done
 done
