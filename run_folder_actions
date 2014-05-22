@@ -2,9 +2,9 @@
 
 #############
 #### Usage:
-####   ${ME} [-f FAILURE_ACTION] [-s SUCCES_ACTION] [-e AFTER_EACH_ACTION] -a ACTION...
-####   ${ME} [-f FAILURE_ACTION] [-s SUCCES_ACTION] [-e AFTER_EACH_ACTION] -d DEFAULT_ACTION
-####   ${ME} [-f FAILURE_ACTION] [-s SUCCES_ACTION] [-e AFTER_EACH_ACTION] -d DEFAULT_ACTION -a ACTION...
+####   ${ME} [-f FAILURE_HANDLER] [-s SUCCESS_HANDLER] [-e AFTER_EACH_HANDLER] -a ACTION...
+####   ${ME} [-f FAILURE_HANDLER] [-s SUCCESS_HANDLER] [-e AFTER_EACH_HANDLER] -d DEFAULT_ACTION
+####   ${ME} [-f FAILURE_HANDLER] [-s SUCCESS_HANDLER] [-e AFTER_EACH_HANDLER] -d DEFAULT_ACTION -a ACTION...
 ### 
 ###  Processes the contents of the current/working directory using the specified
 ###  actions.  Actions are specified by matching a glob pattern to an executable (
@@ -35,9 +35,9 @@
 ###  - with the lock aquired, invoke the handler as described above redirecting the 
 ###    standard output and error streams from the handler to the stdout of ${ME}
 ###  - log an end indicator, indicating the handler invoked and the completion time
-###  - if the handler exited with a non-zero exit code invoke FAILURE_ACTION
-###  - if the handler exited with an exit code of zero invoke SUCCESS_ACTION
-###  - if there is an AFTER_EACH_ACTION, invoke it
+###  - if the handler exited with a non-zero exit code invoke FAILURE_HANDLER
+###  - if the handler exited with an exit code of zero invoke SUCCESS_HANDLER
+###  - if there is an AFTER_EACH_HANDLER, invoke it
 ###
 #############
 
@@ -87,8 +87,11 @@ export -f info
 debug() { [ -n "${DEBUG}" ] && write_log ${FUNCNAME^^} "$@"; }
 export -f debug
 
-die() { echo $1 ; exit ${2-1} ;}
+die() { echo $1 ; exit ${2-1};}
 export -f die
+
+echo_error(){ echo "$@" >&2 ; }
+export -f echo_error
 
 abs_path() {
   (cd "${1%/*}" &>/dev/null && printf "%s/%s" "$(pwd)" "${1##*/}")
@@ -118,7 +121,7 @@ DEFAULT_ACTION=
 declare -a ACTION_LIST
 ACTION_INDEX=0
 DO_NOT_RUN=
-while getopts "ha:d:t" o; do
+while getopts "ha:d:tf:s:e:" o; do
     case "${o}" in
         a)
             ACTION=${OPTARG}
@@ -128,6 +131,30 @@ while getopts "ha:d:t" o; do
         d)
             [ -z "${DEFAULT_ACTION}" ] || ( echo "only one default action allowed" && exit 1 )
             DEFAULT_ACTION=${OPTARG}
+            ;;
+        f)
+            FAILURE_HANDLER="${OPTARG}"
+            if [ ! -x "${FAILURE_HANDLER}" ]
+            then
+              echo_error "Couldn't find an executable failure handler at: ${FAILURE_HANDLER}"  
+              exit 2
+            fi
+            ;;
+        s)
+            SUCCESS_HANDLER="${OPTARG}"
+            if [ ! -x "${SUCCESS_HANDLER}" ]
+            then
+              echo_error "Couldn't find an executable success handler at: ${SUCCESS_HANDLER}"  
+              exit 3
+            fi
+            ;;
+        e)
+            AFTER_EACH_HANDLER="${OPTARG}"
+            if test \! -x "${AFTER_EACH_HANDLER}" 
+            then
+              echo_error "Couldn't find an executable after handler at: ${AFTER_EACH_HANDLER}"  
+              exit 4
+            fi
             ;;
         h)
             show_help
@@ -158,6 +185,10 @@ do
           (
             ${ACTION_PARTS[1]} "${FULL_PATH}"
           )
+          ACTION_EXIT_CODE=$?
+          [ $ACTION_EXIT_CODE -ne 0 ] && ($FAILURE_HANDLER)
+          [ $ACTION_EXIT_CODE -eq 0 ] && ($SUCCESS_HANDLER)
+          ( $AFTER_EACH_HANDLER )
           info '***** end action output *******************************************************' 
           info "Run of ${FULL_PATH} complete for ${ACTION_PARTS[1]}"
         fi
