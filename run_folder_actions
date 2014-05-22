@@ -121,7 +121,7 @@ DEFAULT_ACTION=
 declare -a ACTION_LIST
 ACTION_INDEX=0
 DO_NOT_RUN=
-while getopts "hfa:d:t:s:e:" o; do
+while getopts "hf:a:d:t:s:e:" o; do
     case "${o}" in
         a)
             ACTION=${OPTARG}
@@ -183,8 +183,8 @@ do
   do
     if FULL_PATH=$(abspath $file); then
       if [ -r "$FULL_PATH" -o -d "$FULL_PATH" ]; then
+        info "Starting run of ${ACTION_PARTS[1]} for $FULL_PATH"
         if [ -z "${DO_NOT_RUN}" ]; then
-          info "Starting run of ${ACTION_PARTS[1]} for $FULL_PATH"
           info '***** start action output *******************************************************' 
           (
             ${ACTION_PARTS[1]} "${FULL_PATH}"
