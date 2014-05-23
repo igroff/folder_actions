@@ -175,32 +175,34 @@ for index in $(seq ${#ACTION_LIST[*]})
 do
   # split our action on = so we get a glob, exe pair
   IFS='=' read -ra ACTION_PARTS <<< "${ACTION_LIST[$index]}"
-  debug "glob: ${ACTION_PARTS[0]}"
-  debug "action: ${ACTION_PARTS[1]}"
+  ACTION_HANDLER=$(abs_path "${ACTION_PARTS[1]}")
+  GLOB="${ACTION_PARTS[0]}"
+  debug "glob: ${GLOB}"
+  debug "action: ${ACTION_HANDLER}"
   debug "looking for files in $(pwd)"
   # check our current directory for 'glob matches'
-  for file in "./${ACTION_PARTS[0]}"
+  for file in "./${GLOB}"
   do
     if FULL_PATH=$(abspath $file); then
       if [ -r "$FULL_PATH" -o -d "$FULL_PATH" ]; then
-        info "Starting run of ${ACTION_PARTS[1]} for $FULL_PATH"
+        info "Starting run of ${ACTION_HANDLER} for $FULL_PATH"
         if [ -z "${DO_NOT_RUN}" ]; then
           info '***** start action output *******************************************************' 
           (
-            ${ACTION_PARTS[1]} "${FULL_PATH}"
+            ${ACTION_HANDLER} "${FULL_PATH}"
           )
           ACTION_EXIT_CODE=$?
           [ $ACTION_EXIT_CODE -ne 0 ] && ($FAILURE_HANDLER)
           [ $ACTION_EXIT_CODE -eq 0 ] && ($SUCCESS_HANDLER)
           ( $AFTER_EACH_HANDLER )
           info '***** end action output *******************************************************' 
-          info "Run of ${FULL_PATH} complete for ${ACTION_PARTS[1]}"
+          info "Run of ${FULL_PATH} complete for ${ACTION_HANDLER}"
         else
           info "You asked me not to run, so... not doing anything"
         fi
       fi
     else
-      debug "no files matched glob ${ACTION_PARTS[0]}"
+      debug "no files matched glob ${GLOB}"
     fi
   done
 done

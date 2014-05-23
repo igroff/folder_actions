@@ -1,0 +1,7 @@
+Starting run of /home/igroff/repos/folder_actions/difftest/actions/run_me_for_gifs for /home/igroff/repos/folder_actions/difftest/data/test.gif
+***** start action output *******************************************************
+You ran me /home/igroff/repos/folder_actions/difftest/actions/run_me_for_gifs for /home/igroff/repos/folder_actions/difftest/data/test.gif
+This is from the success handler
+This is from an after each handler
+***** end action output *******************************************************
+Run of /home/igroff/repos/folder_actions/difftest/data/test.gif complete for /home/igroff/repos/folder_actions/difftest/actions/run_me_for_gifs
